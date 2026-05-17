@@ -1,0 +1,4 @@
+The DocuMind API is a backend service for Retrieval-Augmented Generation (RAG) applications. 
+The secret project code word is 'BANANA'. 
+It is built using FastAPI for the web framework, LangChain for orchestration, and ChromaDB for the vector database.
+The default LLM used is llama3-8b-8192 from Groq.

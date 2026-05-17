@@ -1,0 +1,27 @@
+# Web framework
+fastapi
+uvicorn[standard]
+python-multipart
+
+# LangChain ecosystem
+langchain
+langchain-groq
+langchain-community
+
+chromadb
+langchain-chroma
+
+# Document loaders
+pypdf
+
+# Embeddings (local, free)
+sentence-transformers
+
+# Config & env
+pydantic-settings
+python-dotenv
+
+# Testing
+pytest
+pytest-asyncio
+httpx

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocuMind - AI Document Chat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-elements">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-panel">
+            <div class="logo">
+                <i class="fa-solid fa-brain"></i>
+                <h1>DocuMind</h1>
+            </div>
+            
+            <div class="upload-section">
+                <h3><i class="fa-solid fa-cloud-arrow-up"></i> Upload Document</h3>
+                <div class="file-upload-wrapper">
+                    <input type="file" id="fileInput" accept=".pdf,.txt" hidden />
+                    <label for="fileInput" class="btn btn-outline" id="uploadLabel">
+                        Choose File (.pdf, .txt)
+                    </label>
+                    <span id="fileNameDisplay" class="file-name-display"></span>
+                </div>
+                <button id="uploadBtn" class="btn btn-primary" disabled>
+                    <i class="fa-solid fa-bolt"></i> Ingest Document
+                </button>
+                <div id="uploadStatus" class="status-msg hidden"></div>
+            </div>
+
+            <div class="documents-section">
+                <div class="section-header">
+                    <h3><i class="fa-solid fa-folder-open"></i> Your Library</h3>
+                    <button id="refreshBtn" class="btn-icon-small" title="Refresh"><i class="fa-solid fa-rotate-right"></i></button>
+                </div>
+                <div id="documentList" class="doc-list">
+                    <!-- Documents dynamically injected here -->
+                    <div class="loading-docs hidden"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-area glass-panel">
+            <div class="chat-header">
+                <h2><i class="fa-regular fa-comments"></i> Chat Interface</h2>
+                <div class="active-doc-badge hidden" id="activeDocBadge">
+                    <i class="fa-solid fa-file-lines"></i> <span id="activeDocName">Filename.pdf</span>
+                </div>
+            </div>
+            
+            <div id="chatHistory" class="chat-history">
+                <div class="welcome-state" id="welcomeState">
+                    <div class="welcome-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                    <h2>Welcome to DocuMind</h2>
+                    <p>Select a document from your library to begin asking questions.</p>
+                </div>
+            </div>
+            
+            <div class="chat-input-container">
+                <div class="input-glass">
+                    <input type="text" id="chatInput" placeholder="Select a document first..." disabled autocomplete="off" />
+                    <button id="sendBtn" class="btn-send" disabled>
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="chat-footer">Powered by FastAPI, LangChain & Llama3</div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
