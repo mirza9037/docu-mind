@@ -1,20 +1,26 @@
-# 🧠 DocuMind: Full-Stack RAG Platform
+# 🧠 DocuMind — AI Document Chat Platform
 
-DocuMind is a production-ready web application that enables users to securely upload documents (such as PDFs and TXTs) and intuitively converse with them to extract precise, context-aware insights.
+> Upload documents. Ask questions. Get cited answers — instantly.
 
-The application is built on a high-performance FastAPI backend for the web framework, LangChain for orchestration, and ChromaDB for the vector database. When documents are uploaded, they are chunked and embedded locally using HuggingFace's sentence-transformers, with the resulting vectors stored in a persistent, local ChromaDB database—ensuring that sensitive data never leaves the local environment for storage.
+DocuMind is a full-stack **Retrieval-Augmented Generation (RAG)** platform. Upload PDFs or text files, and chat with them in natural language. The AI only answers from your documents and always cites its sources.
 
-During the chat phase, relevant document chunks are retrieved via semantic search and passed as context to a blazing-fast Large Language Model. The system leverages Groq's LPU inference engine, using the llama3-8b-8192 model as the default LLM, to stream responses back to the user almost instantly, complete with accurate citations.
+**Live Demo:**
+- 🌐 **Frontend:** [Deployed on Vercel](https://docu-mind-mirza9037.vercel.app)
+- ⚡ **Backend API:** [https://mirza9037--documind-api-fastapi-app.modal.run](https://mirza9037--documind-api-fastapi-app.modal.run)
+- 📖 **Swagger Docs:** [https://mirza9037--documind-api-fastapi-app.modal.run/docs](https://mirza9037--documind-api-fastapi-app.modal.run/docs)
 
 ---
 
 ## 🚀 Key Features
 
-* **Secure & Local Processing:** Document embeddings are generated and stored entirely locally using sentence-transformers and a persistent ChromaDB instance.
-* **Lightning-Fast Inference:** Powered by Groq's LPU for near-instantaneous, cited chat responses.
-* **Interactive UI:** A sleek, responsive frontend built with Vanilla HTML, CSS, and JavaScript, featuring modern glassmorphism design and dynamic uploading states.
-* **Comprehensive API:** A full set of RESTful API endpoints documented interactively via Swagger UI.
-* **One-Click Deployment:** The entire full-stack application is fully containerized with Docker.
+- **Local Embeddings** — Documents are chunked and embedded using HuggingFace `sentence-transformers` (`all-MiniLM-L6-v2`). No third-party embedding API. Your data stays private.
+- **Lightning-Fast LLM** — Powered by Groq's LPU inference engine running `llama-3.1-8b-instant` for near-instant responses.
+- **Persistent Vector Store** — ChromaDB stores embeddings in a Modal Volume, surviving restarts and redeployments.
+- **Cited Answers** — Every AI response includes the source chunks it was derived from (filename + page number).
+- **Multi-turn Chat** — Pass `history[]` in your API calls for context-aware follow-up questions.
+- **Scoped Queries** — Optionally pass a `document_id` to restrict retrieval to one specific document.
+- **Premium UI** — Glassmorphism dark-mode design with animated orb backgrounds, smooth transitions, and full responsiveness.
+- **Production Deployed** — Backend on Modal (serverless, always-on), Frontend on Vercel (CDN-hosted static).
 
 ---
 
@@ -24,78 +30,262 @@ During the chat phase, relevant document chunks are retrieved via semantic searc
 | --- | --- |
 | **Frontend** | Vanilla HTML, CSS, JavaScript |
 | **Web Framework** | FastAPI |
-| **LLM** | Groq (llama3-8b-8192) |
+| **LLM** | Groq (`llama-3.1-8b-instant`) |
 | **Orchestration** | LangChain |
-| **Vector Database** | ChromaDB (persistent, local) |
-| **Embeddings** | sentence-transformers (local, free) |
-| **Deployment** | Docker & Docker Compose |
+| **Vector Database** | ChromaDB (persistent, Modal Volume) |
+| **Embeddings** | `sentence-transformers/all-MiniLM-L6-v2` (local, free) |
+| **Backend Hosting** | Modal (serverless ASGI) |
+| **Frontend Hosting** | Vercel (static CDN) |
+| **Containerization** | Docker + Docker Compose (local dev) |
 
 ---
 
-## ⚙️ Quick Start
+## 📁 Project Structure
+
+```
+documind/
+├── app/                        # FastAPI backend
+│   ├── main.py                 # App entrypoint: routers, CORS, lifespan
+│   ├── api/
+│   │   ├── deps.py             # Shared FastAPI dependencies
+│   │   └── routes/
+│   │       ├── health.py       # GET /health — liveness + ChromaDB status
+│   │       ├── documents.py    # POST /documents/upload, GET, DELETE
+│   │       └── chat.py         # POST /chat — RAG question answering
+│   ├── core/
+│   │   ├── config.py           # Pydantic settings (reads from .env)
+│   │   └── logging.py          # Structured logger
+│   ├── models/
+│   │   └── schemas.py          # Pydantic request/response schemas
+│   └── services/
+│       ├── ingestor.py         # File parsing, chunking, metadata tagging
+│       ├── vectorstore.py      # ChromaDB CRUD (add, search, list, delete)
+│       └── rag.py              # RAG pipeline: retrieve → prompt → Groq → cite
+├── frontend/                   # Static frontend (deployed to Vercel)
+│   ├── index.html              # App shell
+│   ├── style.css               # Full glassmorphism design system
+│   └── app.js                  # All UI logic, API calls, chat/upload state
+├── tests/                      # Pytest test suite
+│   ├── conftest.py             # Shared fixtures (TestClient, mocks)
+│   ├── test_documents.py       # Upload, list, delete endpoint tests
+│   └── test_chat.py            # Chat endpoint + RAG pipeline tests
+├── modal_deploy.py             # Modal serverless deployment config
+├── vercel.json                 # Vercel static site config (points to frontend/)
+├── Dockerfile                  # Docker image (local / self-hosted)
+├── docker-compose.yml          # One-command local stack
+├── requirements.txt            # Python dependencies
+└── .env                        # Environment variables (not committed)
+```
+
+---
+
+## ⚙️ Local Development
 
 ### Prerequisites
 
-* Python 3.11+
-* Docker & Docker Compose (optional, for containerized run)
-* A free Groq API Key
+- Python 3.11+
+- A free [Groq API Key](https://console.groq.com)
 
-### Installation
-
-**1. Clone the repository**
+### Setup
 
 ```bash
-git clone https://github.com/yourusername/documind.git
-cd documind
-```
+# 1. Clone
+git clone https://github.com/mirza9037/docu-mind.git
+cd docu-mind
 
-**2. Set up the environment**
-Create a virtual environment and install the required dependencies:
-
-```bash
+# 2. Create virtual environment
 python -m venv .venv
-# Windows: 
-.\.venv\Scripts\activate  
-# Mac/Linux: 
-source .venv/bin/activate
+.\.venv\Scripts\activate        # Windows
+# source .venv/bin/activate     # Mac/Linux
+
+# 3. Install dependencies
 pip install -r requirements.txt
+
+# 4. Configure environment
+# Edit .env and set your GROQ_API_KEY
 ```
 
-**3. Configure environment variables**
-Duplicate the example environment file and add your Groq API key:
+### Environment Variables (`.env`)
 
-```bash
-cp .env.example .env
+```env
+# LLM
+GROQ_API_KEY=gsk_your_key_here
+GROQ_MODEL=llama-3.1-8b-instant
+
+# Vector Store
+CHROMA_PERSIST_DIR=./data/chroma_db
+CHROMA_COLLECTION=documind
+
+# Embeddings (local, no API key)
+EMBEDDING_MODEL=all-MiniLM-L6-v2
+
+# App
+APP_NAME=DocuMind API
+APP_VERSION=1.0.0
+MAX_UPLOAD_SIZE_MB=10
+CHUNK_SIZE=1000
+CHUNK_OVERLAP=150
+TOP_K_RESULTS=4
 ```
 
-**4. Run the application**
-Start the FastAPI backend:
+### Run
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-Open **http://localhost:8000/** for the Frontend UI, or **http://localhost:8000/docs** for the interactive Swagger API documentation.
+| URL | Description |
+| --- | --- |
+| http://localhost:8000/ | Frontend UI |
+| http://localhost:8000/docs | Interactive Swagger API docs |
+| http://localhost:8000/health | Health check |
 
-### 🐳 Docker Deployment
+---
 
-To spin up the entire stack seamlessly:
+## 🐳 Docker (Self-Hosted)
 
 ```bash
 docker-compose up --build
 ```
 
+The compose file mounts `./data` for ChromaDB persistence and exposes port `8000`.
+
 ---
 
-## 🔌 API Endpoints
+## ☁️ Production Deployment
 
-| Method | Endpoint | Description |
-| --- | --- | --- |
-| **GET** | `/health` | Liveness check |
-| **POST** | `/documents/upload` | Upload a PDF or .txt file |
-| **GET** | `/documents/` | List all stored documents |
-| **DELETE** | `/documents/{id}` | Delete a specific document |
-| **POST** | `/chat/` | Ask a question against an uploaded document |
+### Backend → Modal
+
+```bash
+# 1. Install Modal
+pip install modal
+
+# 2. Authenticate (one-time)
+modal setup
+
+# 3. Create secrets
+modal secret create documind-secrets GROQ_API_KEY=gsk_...
+
+# 4. Deploy (persistent, always-on)
+modal deploy modal_deploy.py
+
+# Dev mode (hot reload, stops on Ctrl+C)
+modal serve modal_deploy.py
+```
+
+The Modal deploy:
+- Builds a Debian Slim image with all Python deps
+- Pre-downloads the `all-MiniLM-L6-v2` embedding model at build time (faster cold starts)
+- Mounts a persistent `documind-chroma-db` Volume at `/app/data`
+- Runs with `min_containers=1` and handles up to 10 concurrent requests
+
+### Frontend → Vercel
+
+The `vercel.json` at the root tells Vercel to serve the `frontend/` directory as a static site:
+
+```json
+{
+  "outputDirectory": "frontend",
+  "buildCommand": "",
+  "installCommand": "",
+  "framework": null
+}
+```
+
+Push to `main` → Vercel auto-deploys. Or deploy manually:
+
+```bash
+npx vercel --prod
+```
+
+---
+
+## 🔌 API Reference
+
+### `GET /health`
+Returns liveness status and ChromaDB connection info.
+
+```json
+{
+  "status": "ok",
+  "app": "DocuMind API",
+  "version": "1.0.0",
+  "vector_store": "connected (42 chunks loaded)"
+}
+```
+
+### `POST /documents/upload`
+Upload a `.pdf` or `.txt` file. Returns a `document_id` for scoped queries.
+
+```bash
+curl -X POST https://mirza9037--documind-api-fastapi-app.modal.run/documents/upload \
+  -F "file=@my_doc.pdf"
+```
+
+```json
+{
+  "document_id": "uuid-here",
+  "filename": "my_doc.pdf",
+  "chunk_count": 24,
+  "message": "Successfully ingested 'my_doc.pdf' into 24 chunks."
+}
+```
+
+### `GET /documents/`
+List all stored documents with metadata.
+
+```json
+{
+  "total": 2,
+  "documents": [
+    {
+      "document_id": "uuid",
+      "filename": "my_doc.pdf",
+      "uploaded_at": "2026-05-21T15:00:00+00:00",
+      "chunk_count": 24
+    }
+  ]
+}
+```
+
+### `DELETE /documents/{document_id}`
+Permanently remove a document and all its chunks from ChromaDB.
+
+### `POST /chat/`
+Ask a question. Optionally scope to a document and pass conversation history.
+
+```json
+// Request
+{
+  "question": "What is the refund policy?",
+  "document_id": "uuid-here",
+  "history": []
+}
+
+// Response
+{
+  "answer": "The refund policy states...",
+  "sources": [
+    {
+      "document_id": "uuid",
+      "filename": "my_doc.pdf",
+      "excerpt": "Refunds are processed within 7 business days...",
+      "page": 3
+    }
+  ],
+  "model_used": "llama-3.1-8b-instant"
+}
+```
+
+---
+
+## 🧪 Testing
+
+```bash
+pytest tests/ -v
+```
+
+Tests use `FastAPI.TestClient` with mocked ChromaDB and Groq LLM — no real API calls or database needed.
 
 ---
 
@@ -103,4 +293,5 @@ docker-compose up --build
 
 **Mirza Obaid**
 
-* **LinkedIn:** [linkedin.com/in/mirzaobaid](https://www.linkedin.com/in/mirzaobaid)
+- **LinkedIn:** [linkedin.com/in/mirzaobaid](https://www.linkedin.com/in/mirzaobaid)
+- **GitHub:** [github.com/mirza9037](https://github.com/mirza9037)
