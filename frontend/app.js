@@ -1,3 +1,9 @@
+// ── API Configuration ──────────────────────────────────────────────────────
+// Replace with your Modal deployment URL (from `modal deploy modal_deploy.py`)
+// Dev URL (modal serve):   https://mirza9037--documind-api-fastapi-app-dev.modal.run
+// Prod URL (modal deploy): https://mirza9037--documind-api-fastapi-app.modal.run
+const API_BASE = 'https://mirza9037--documind-api-fastapi-app-dev.modal.run';
+
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const fileInput = document.getElementById('fileInput');
@@ -40,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showStatus('Uploading and embedding...', 'info');
 
         try {
-            const res = await fetch('/documents/upload', {
+            const res = await fetch(`${API_BASE}/documents/upload`, {
                 method: 'POST',
                 body: formData
             });
@@ -50,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showStatus('Success! Document ingested.', 'success');
                 fileInput.value = '';
                 fileNameDisplay.textContent = '';
-                loadDocuments(); // Refresh list
+                loadDocuments();
             } else {
                 showStatus(data.detail || 'Upload failed', 'error');
             }
@@ -73,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadDocuments() {
         documentList.innerHTML = '<div class="loading-docs"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>';
         try {
-            const res = await fetch('/documents/');
+            const res = await fetch(`${API_BASE}/documents/`);
             const data = await res.json();
             
             documentList.innerHTML = '';
@@ -87,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 docEl.className = 'doc-item' + (doc.document_id === currentDocumentId ? ' active' : '');
                 docEl.dataset.id = doc.document_id;
                 
-                // Determine icon
                 const ext = doc.filename.split('.').pop().toLowerCase();
                 const icon = ext === 'pdf' ? 'fa-file-pdf' : 'fa-file-lines';
 
@@ -101,13 +106,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     </button>
                 `;
 
-                // Select document
                 docEl.addEventListener('click', (e) => {
-                    if (e.target.closest('.doc-delete')) return; // Ignore delete clicks
+                    if (e.target.closest('.doc-delete')) return;
                     selectDocument(doc.document_id, doc.filename);
                 });
 
-                // Delete document
                 const deleteBtn = docEl.querySelector('.doc-delete');
                 deleteBtn.addEventListener('click', async (e) => {
                     e.stopPropagation();
@@ -126,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function deleteDocument(id) {
         if (!confirm('Are you sure you want to delete this document?')) return;
         try {
-            await fetch(`/documents/${id}`, { method: 'DELETE' });
+            await fetch(`${API_BASE}/documents/${id}`, { method: 'DELETE' });
             if (currentDocumentId === id) {
                 currentDocumentId = null;
                 resetChatState();
@@ -140,7 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function selectDocument(id, filename) {
         currentDocumentId = id;
         
-        // Update UI
         document.querySelectorAll('.doc-item').forEach(el => {
             el.classList.toggle('active', el.dataset.id === id);
         });
@@ -156,7 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
             welcomeState.classList.add('hidden');
         }
         
-        // Clear chat history for new doc (optional, but good for context isolation)
         chatHistory.innerHTML = '';
         appendMessage('ai', `I'm ready! What would you like to know about <strong>${filename}</strong>?`);
     }
@@ -178,17 +179,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = chatInput.value.trim();
         if (!text || !currentDocumentId) return;
 
-        // Add User Message
         appendMessage('user', text);
         chatInput.value = '';
         chatInput.disabled = true;
         sendBtn.disabled = true;
 
-        // Add Loading Indicator
         const loadingId = appendTypingIndicator();
 
         try {
-            const res = await fetch('/chat/', {
+            const res = await fetch(`${API_BASE}/chat/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -235,7 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }
 
-        // Format newlines
         const formattedText = text.replace(/\n/g, '<br>');
 
         msgEl.innerHTML = `

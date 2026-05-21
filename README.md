@@ -1,155 +1,106 @@
-# 🧠 DocuMind
+# 🧠 DocuMind: Full-Stack RAG Platform
 
-A full-stack, production-ready **Retrieval-Augmented Generation (RAG)** application. DocuMind allows users to upload documents (PDFs, TXTs) and securely chat with them to extract insights, powered by blazing-fast LLMs and a sleek UI.
+DocuMind is a production-ready web application that enables users to securely upload documents (such as PDFs and TXTs) and intuitively converse with them to extract precise, context-aware insights.
 
-Upload documents → Ask questions → Get precise, context-aware answers.
+The application is built on a high-performance FastAPI backend for the web framework, LangChain for orchestration, and ChromaDB for the vector database. When documents are uploaded, they are chunked and embedded locally using HuggingFace's sentence-transformers, with the resulting vectors stored in a persistent, local ChromaDB database—ensuring that sensitive data never leaves the local environment for storage.
 
----
-
-## ✨ Features
-
-- **End-to-End Application**: Comes with a fully functional FastAPI backend and a sleek, modern vanilla HTML/JS/CSS frontend.
-- **Retrieval-Augmented Generation (RAG)**: Leverages your own documents as context to answer complex queries accurately.
-- **Blazing Fast LLM**: Powered by Groq's LPU inference engine for near-instant response times.
-- **Local Vector Database**: Uses ChromaDB for fast, persistent, and local document embedding retrieval.
-- **RESTful API**: Comprehensive API endpoints with Swagger UI documentation out-of-the-box.
-- **Docker Ready**: Fully containerized setup for easy deployments using Docker Compose.
+During the chat phase, relevant document chunks are retrieved via semantic search and passed as context to a blazing-fast Large Language Model. The system leverages Groq's LPU inference engine, using the llama3-8b-8192 model as the default LLM, to stream responses back to the user almost instantly, complete with accurate citations.
 
 ---
 
-## 🛠️ Tech Stack
+## 🚀 Key Features
 
-### Backend
-- **Framework**: [FastAPI](https://fastapi.tiangolo.com/)
-- **Orchestration**: [LangChain](https://python.langchain.com/)
-- **LLM Provider**: [Groq](https://console.groq.com/) (llama3-8b-8192)
-- **Vector Database**: [ChromaDB](https://www.trychroma.com/) (Persistent & Local)
-- **Embeddings**: `sentence-transformers` (HuggingFace)
-
-### Frontend
-- **Structure**: Vanilla HTML5
-- **Styling**: Vanilla CSS (Responsive, Glassmorphism design)
-- **Logic**: Vanilla JavaScript (Fetch API for integration)
+* **Secure & Local Processing:** Document embeddings are generated and stored entirely locally using sentence-transformers and a persistent ChromaDB instance.
+* **Lightning-Fast Inference:** Powered by Groq's LPU for near-instantaneous, cited chat responses.
+* **Interactive UI:** A sleek, responsive frontend built with Vanilla HTML, CSS, and JavaScript, featuring modern glassmorphism design and dynamic uploading states.
+* **Comprehensive API:** A full set of RESTful API endpoints documented interactively via Swagger UI.
+* **One-Click Deployment:** The entire full-stack application is fully containerized with Docker.
 
 ---
 
-## 🚀 Quick Start (Local Setup)
+## 🛠️ Technology Stack
 
-### 1. Prerequisites
-- Python 3.10+
-- Git
+| Layer | Technology |
+| --- | --- |
+| **Frontend** | Vanilla HTML, CSS, JavaScript |
+| **Web Framework** | FastAPI |
+| **LLM** | Groq (llama3-8b-8192) |
+| **Orchestration** | LangChain |
+| **Vector Database** | ChromaDB (persistent, local) |
+| **Embeddings** | sentence-transformers (local, free) |
+| **Deployment** | Docker & Docker Compose |
 
-### 2. Clone the Repository
+---
+
+## ⚙️ Quick Start
+
+### Prerequisites
+
+* Python 3.11+
+* Docker & Docker Compose (optional, for containerized run)
+* A free Groq API Key
+
+### Installation
+
+**1. Clone the repository**
+
 ```bash
 git clone https://github.com/yourusername/documind.git
 cd documind
 ```
 
-### 3. Set Up Virtual Environment
+**2. Set up the environment**
+Create a virtual environment and install the required dependencies:
+
 ```bash
-# Create a virtual environment
 python -m venv .venv
-
-# Activate it
-# Windows:
-.\.venv\Scripts\activate
-# Mac/Linux:
+# Windows: 
+.\.venv\Scripts\activate  
+# Mac/Linux: 
 source .venv/bin/activate
-```
-
-### 4. Install Dependencies
-```bash
 pip install -r requirements.txt
 ```
 
-### 5. Configure Environment Variables
-Copy the example environment file and add your API keys:
+**3. Configure environment variables**
+Duplicate the example environment file and add your Groq API key:
+
 ```bash
 cp .env.example .env
 ```
-*Open the `.env` file and insert your `GROQ_API_KEY` (Get one for free at [console.groq.com](https://console.groq.com/keys)).*
 
-### 6. Run the Application
-Start the FastAPI server (which also serves the frontend):
+**4. Run the application**
+Start the FastAPI backend:
+
 ```bash
 uvicorn app.main:app --reload
 ```
 
-- **Frontend UI**: [http://localhost:8000/](http://localhost:8000/)
-- **Interactive API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+Open **http://localhost:8000/** for the Frontend UI, or **http://localhost:8000/docs** for the interactive Swagger API documentation.
 
----
+### 🐳 Docker Deployment
 
-## 🐳 Docker Deployment
-
-Don't want to install dependencies locally? You can run the entire stack using Docker!
+To spin up the entire stack seamlessly:
 
 ```bash
-# Build and run the containers
 docker-compose up --build
 ```
-The application will be accessible at `http://localhost:8000`.
 
 ---
 
-## 📡 API Endpoints
-
-Once the application is running, you can access the interactive Swagger documentation at `/docs`.
+## 🔌 API Endpoints
 
 | Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/health` | Liveness check |
-| `POST` | `/documents/upload` | Upload a PDF or .txt file into the vector database |
-| `GET` | `/documents/` | List all stored documents in the system |
-| `DELETE` | `/documents/{id}` | Delete a specific document by its ID |
-| `POST` | `/chat/` | Ask a question against the uploaded documents |
+| --- | --- | --- |
+| **GET** | `/health` | Liveness check |
+| **POST** | `/documents/upload` | Upload a PDF or .txt file |
+| **GET** | `/documents/` | List all stored documents |
+| **DELETE** | `/documents/{id}` | Delete a specific document |
+| **POST** | `/chat/` | Ask a question against an uploaded document |
 
 ---
 
-## 📂 Project Structure
+## 👨‍💻 Author
 
-```text
-documind/
-├── app/                      # Backend FastAPI Application
-│   ├── api/                  # API Routers and Dependencies
-│   ├── core/                 # App config, settings, and logging
-│   ├── models/               # Pydantic schemas for request/response
-│   ├── services/             # Core business logic (RAG, Vectorstore, Ingestor)
-│   └── main.py               # FastAPI entry point
-├── frontend/                 # Vanilla Frontend UI assets
-│   ├── index.html
-│   ├── style.css
-│   └── app.js
-├── data/                     # Local ChromaDB persistent storage (auto-generated)
-├── tests/                    # Pytest test suite
-├── .env.example              # Environment variable template
-├── Dockerfile                # Docker configuration for the API
-├── docker-compose.yml        # Docker Compose configuration
-└── requirements.txt          # Python dependencies
-```
+**Mirza Obaid**
 
----
-
-## 🧪 Running Tests
-
-To ensure everything is working correctly, you can run the test suite using `pytest`:
-
-```bash
-pytest tests/ -v
-```
-
----
-
-## 🤝 Contributing
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/yourusername/documind/issues).
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-## 📝 License
-Distributed under the MIT License. See `LICENSE` for more information.
+* **LinkedIn:** [linkedin.com/in/mirzaobaid](https://www.linkedin.com/in/mirzaobaid)
