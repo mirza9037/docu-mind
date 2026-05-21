@@ -1,8 +1,6 @@
 // ── API Configuration ──────────────────────────────────────────────────────
-// Replace with your Modal deployment URL (from `modal deploy modal_deploy.py`)
-// Dev URL (modal serve):   https://mirza9037--documind-api-fastapi-app-dev.modal.run
-// Prod URL (modal deploy): https://mirza9037--documind-api-fastapi-app.modal.run
-const API_BASE = 'https://mirza9037--documind-api-fastapi-app-dev.modal.run';
+// Modal production deployment URL
+const API_BASE = 'https://mirza9037--documind-api-fastapi-app.modal.run';
 
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
